@@ -15,7 +15,7 @@ All configuration lives in plain files under `config/`. The script reads them an
 ## Getting started
 
 ```bash
-git clone <your-repo-url> ~/term
+git clone https://github.com/msdeleyto/term.git ~/term
 cd ~/term
 bash install.sh
 ```
