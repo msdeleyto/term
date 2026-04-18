@@ -21,8 +21,7 @@ bash install.sh
 
 After it finishes:
 
-1. Install **MesloLGS NF** fonts manually and set your terminal emulator to use them (the script does not download fonts).
-2. Restart your terminal or run `exec zsh`.
+1. Restart your terminal or run `exec zsh`.
 
 The script is **idempotent** — re-running it skips anything already in place and applies only what has changed.
 
@@ -31,12 +30,13 @@ The script is **idempotent** — re-running it skips anything already in place a
 | Step | Action |
 |------|--------|
 | 1 | Verify `curl`, `git`, and `zsh` are available (exits with an error if any are missing) |
-| 2 | Install [Oh My Zsh](https://ohmyz.sh/) (unattended) if `~/.oh-my-zsh` is absent |
-| 3 | Clone [Powerlevel10k](https://github.com/romkatv/powerlevel10k) theme |
-| 4 | Set `ZSH_THEME="powerlevel10k/powerlevel10k"` in `~/.zshrc` |
-| 5 | Apply plugins from `config/plugins.txt` to the `plugins=(...)` line in `~/.zshrc` |
-| 6 | Copy `config/p10k.zsh` to `~/.p10k.zsh` and add a source line to `~/.zshrc` |
-| 7 | Copy `config/aliases.zsh` to `~/.aliases` and add a source line to `~/.zshrc` |
+| 2 | Download MesloLGS NF fonts to `~/.local/share/fonts/p10k/` and refresh the font cache |
+| 3 | Install [Oh My Zsh](https://ohmyz.sh/) (unattended) if `~/.oh-my-zsh` is absent |
+| 4 | Clone [Powerlevel10k](https://github.com/romkatv/powerlevel10k) theme |
+| 5 | Set `ZSH_THEME="powerlevel10k/powerlevel10k"` in `~/.zshrc` |
+| 6 | Apply plugins from `config/plugins.txt` to the `plugins=(...)` line in `~/.zshrc` |
+| 7 | Copy `config/p10k.zsh` to `~/.p10k.zsh` and add a source line to `~/.zshrc` |
+| 8 | Copy `config/zsh_aliases` to `~/.zsh_aliases` and add a source line to `~/.zshrc` |
 
 ## Repository structure
 
@@ -45,6 +45,7 @@ term/
 ├── install.sh            # Bootstrap entry point
 ├── helpers/
 │   ├── prerequisites-helper.sh   # Verifies required tools
+│   ├── fonts-helper.sh           # Downloads and installs Nerd Fonts
 │   ├── omz-helper.sh             # Installs Oh My Zsh and applies plugins
 │   ├── p10k-helper.sh            # Clones Powerlevel10k and applies p10k config
 │   └── shell-config-helper.sh    # Copies aliases and writes source line
@@ -52,7 +53,7 @@ term/
 │   └── utils.sh          # Shared logging functions and write_block helper
 └── config/
     ├── plugins.txt       # Oh My Zsh plugins, one per line
-    ├── aliases.zsh       # Shell aliases copied to ~/.aliases at install time
+    ├── zsh_aliases       # Shell aliases copied to ~/.zsh_aliases at install time
     └── p10k.zsh          # Powerlevel10k theme configuration
 ```
 
@@ -75,7 +76,18 @@ Re-run `bash install.sh` to apply.
 
 ### Adding aliases
 
-Edit [`config/aliases.zsh`](./config/aliases.zsh). On the next `bash install.sh` run the file is copied to `~/.aliases`, which is sourced by `~/.zshrc`, so changes take effect on the next shell session (or after `reload`).
+Edit [`config/zsh_aliases`](./config/zsh_aliases). On the next `bash install.sh` run the file is copied to `~/.zsh_aliases`, which is sourced by `~/.zshrc`, so changes take effect on the next shell session (or after `reload`).
+
+### Fonts
+
+The default font is **MesloLGS NF** (recommended by Powerlevel10k). To install a different font, edit the variables at the top of [`helpers/fonts-helper.sh`](./helpers/fonts-helper.sh):
+
+- `FONT_NAME` — human-readable label used in log messages
+- `FONT_FILES` — associative array mapping `filename.ttf` → download URL
+
+Re-run `bash install.sh` to apply. Font files are downloaded to `~/.local/share/fonts/p10k/`; existing files are skipped (idempotent). The font cache (`fc-cache -fv`) is only refreshed when at least one new file is downloaded.
+
+After install, set your terminal emulator's font to the installed font.
 
 ### Customising the prompt
 

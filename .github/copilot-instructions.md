@@ -22,12 +22,13 @@ bash -n lib/utils.sh
 
 ## Architecture
 
-`install.sh` is a thin orchestrator — it sets path variables and calls four helpers in order:
+`install.sh` is a thin orchestrator — it sets path variables and calls five helpers in order:
 
 1. `helpers/prerequisites-helper.sh` — checks for `curl`, `git`, `zsh`
-2. `helpers/omz-helper.sh <zshrc> <omz_dir> <plugins_file>` — installs Oh My Zsh, writes the OMZ block to `~/.zshrc`
-3. `helpers/p10k-helper.sh <zshrc> <p10k_theme_dir> <p10k_src>` — clones Powerlevel10k, copies `config/p10k.zsh` to `~/.p10k.zsh`
-4. `helpers/shell-config-helper.sh <zshrc> <aliases_file>` — copies `config/zsh_aliases` to `~/.zsh_aliases`
+2. `helpers/fonts-helper.sh` — downloads MesloLGS NF fonts to `~/.local/share/fonts/p10k/`; configurable via `FONT_NAME` + `FONT_FILES` at the top of the script
+3. `helpers/omz-helper.sh <zshrc> <omz_dir> <plugins_file>` — installs Oh My Zsh, writes the OMZ block to `~/.zshrc`
+4. `helpers/p10k-helper.sh <zshrc> <p10k_theme_dir> <p10k_src>` — clones Powerlevel10k, copies `config/p10k.zsh` to `~/.p10k.zsh`
+5. `helpers/shell-config-helper.sh <zshrc> <aliases_file>` — copies `config/zsh_aliases` to `~/.zsh_aliases`
 
 Every helper sources `lib/utils.sh` at the top using a `$(dirname "${BASH_SOURCE[0]}")` relative path. Helpers receive all paths as positional arguments — not environment variables.
 
