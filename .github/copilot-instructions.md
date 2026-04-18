@@ -27,15 +27,21 @@ bash -n lib/utils.sh
 
 Any change to `tests/bats/` **must** be verified by running the Docker test suite before committing. Do not rely on syntax-only checks for bats files — tests must actually execute and pass.
 
-#### bats PATH-restriction pattern
-When testing for missing prerequisites, use `env` + an absolute interpreter path to restrict PATH for the subprocess only. Using `PATH="..." run bash ...` silently breaks because `run` is a shell function — the assignment modifies the current shell's PATH, causing bash itself to be unfindable (exit 127):
+#### bats `command` override pattern
+When testing that a specific tool is detected as missing, **do not restrict `$PATH`**. PATH manipulation breaks `lib/utils.sh` and any other commands the helper relies on.
+
+Instead, override the `command` builtin with a bash function scoped to the subprocess. In bash, functions shadow builtins; `builtin command` still reaches the real one. `export -f` propagates the override into child processes:
 
 ```bash
-# ✗ Wrong — modifies the current shell's PATH; bash can't be found (exit 127)
+# ✗ Wrong — strips PATH globally; breaks echo, grep, etc. inside the helper
 PATH="${tmpbin}" run bash script.sh
 
-# ✓ Correct — env restricts PATH only for the subprocess; /bin/bash is absolute
-run env PATH="${tmpbin}" /bin/bash script.sh
+# ✓ Correct — shadows 'command -v zsh' only; PATH and all other commands untouched
+run bash -c '
+  command() { [[ "$1" == "-v" && "$2" == "zsh" ]] && return 1; builtin command "$@"; }
+  export -f command
+  bash /repo/helpers/prerequisites-helper.sh
+'
 ```
 
 ## Architecture
