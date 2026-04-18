@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Verifies required tools are present, installs zsh, and sets it as default shell.
 
+# shellcheck source=../lib/utils.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/utils.sh"
+
 info "Checking prerequisites"
 
 missing=()

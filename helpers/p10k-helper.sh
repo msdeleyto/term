@@ -2,6 +2,9 @@
 # Clones the Powerlevel10k theme, installs MesloLGS Nerd Fonts,
 # and applies the configuration from config/p10k.zsh.
 
+# shellcheck source=../lib/utils.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/utils.sh"
+
 FONTS_DIR="${HOME}/.local/share/fonts"
 FONT_BASE_URL="https://github.com/romkatv/powerlevel10k-media/raw/master"
 declare -A FONTS=(
@@ -24,22 +27,22 @@ else
   success "Powerlevel10k installed."
 fi
 
-info "Installing MesloLGS Nerd Fonts"
-mkdir -p "${FONTS_DIR}"
-fonts_installed=0
-for font_name in "${!FONTS[@]}"; do
-  font_path="$FONTS_DIR/$font_name"
-  if [[ -f "$font_path" ]]; then
-    success "Font already present: $font_name"
-  else
-    info "Downloading: $font_name"
-    curl -fsSL --create-dirs -o "$font_path" "${FONTS[$font_name]}"
-    (( fonts_installed++ )) || true
-  fi
-done
-if (( fonts_installed > 0 )); then
-  success "MesloLGS Nerd Fonts installed."
-fi
+# info "Installing MesloLGS Nerd Fonts"
+# mkdir -p "${FONTS_DIR}"
+# fonts_installed=0
+# for font_name in "${!FONTS[@]}"; do
+#   font_path="$FONTS_DIR/$font_name"
+#   if [[ -f "$font_path" ]]; then
+#     success "Font already present: $font_name"
+#   else
+#     info "Downloading: $font_name"
+#     curl -fsSL --create-dirs -o "$font_path" "${FONTS[$font_name]}"
+#     (( fonts_installed++ )) || true
+#   fi
+# done
+# if (( fonts_installed > 0 )); then
+#   success "MesloLGS Nerd Fonts installed."
+# fi
 
 info "Configuring Powerlevel10k"
 if [[ ! -f "${p10k_src_path}" ]]; then

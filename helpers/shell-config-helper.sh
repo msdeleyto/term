@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Applies shell environment configuration
 
+# shellcheck source=../lib/utils.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/utils.sh"
+
 zshrc_path="$1"
 aliases_file_path="$2"
 
