@@ -22,6 +22,3 @@ alias gl='git log --oneline --graph --decorate'
 
 # Reload shell config
 alias reload='source ~/.zshrc && echo "zshrc reloaded"'
-
-# Quick edit of this aliases file
-alias ealias='${EDITOR:-nano} "$TERM_BOOTSTRAP_DIR/config/aliases.zsh"'
