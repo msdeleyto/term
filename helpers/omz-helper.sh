@@ -26,9 +26,6 @@ if [[ -f "${plugins_file_path}" ]]; then
   plugins_zsh_line="plugins=(${plugins_list})"
 fi
 
-# Strip legacy bare lines left by previous installs
-sed -i '/^export ZSH=/d; /^ZSH_THEME=/d; /^plugins=(/d; /^source "\$ZSH\/oh-my-zsh\.sh"/d' "${zshrc_path}"
-
 omz_block="export ZSH=\"\$HOME/.oh-my-zsh\"
 ZSH_THEME=\"powerlevel10k/powerlevel10k\"
 ${plugins_zsh_line}

@@ -49,11 +49,6 @@ if [[ ! -f "${p10k_src_path}" ]]; then
   warn "No ${p10k_src_path} found — skipping p10k config."
 else
   cp "${p10k_src_path}" "${HOME}/.p10k.zsh"
-  success "Copied p10k config to ~/.p10k.zsh"
-
-  # Strip legacy bare line
-  sed -i '/^\[\[ -f ~\/\.p10k\.zsh \]\] && source ~\/\.p10k\.zsh$/d' "${zshrc_path}"
-
-  write_block "Powerlevel10k" '[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh' "${zshrc_path}"
+  write_block "Powerlevel10k" 'source ~/.p10k.zsh' "${zshrc_path}"
   success "Powerlevel10k block written to ${zshrc_path}."
 fi

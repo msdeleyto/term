@@ -18,7 +18,7 @@ CONFIG_DIR="${SCRIPT_DIR}/config"
 ${SCRIPT_DIR}/helpers/prerequisites-helper.sh
 ${SCRIPT_DIR}/helpers/omz-helper.sh "${ZSHRC_PATH}" "${OMZ_DIR}" "${CONFIG_DIR}/plugins.txt"
 ${SCRIPT_DIR}/helpers/p10k-helper.sh "${ZSHRC_PATH}" "${P10K_THEME_DIR}" "${CONFIG_DIR}/p10k.zsh"
-${SCRIPT_DIR}/helpers/shell-config-helper.sh "${ZSHRC_PATH}" "${CONFIG_DIR}/aliases.zsh"
+${SCRIPT_DIR}/helpers/shell-config-helper.sh "${ZSHRC_PATH}" "${CONFIG_DIR}/zsh_aliases"
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
