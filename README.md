@@ -102,3 +102,24 @@ No build step required. To validate the script's syntax before running:
 ```bash
 bash -n install.sh
 ```
+
+### Testing
+
+Tests run entirely inside a Docker container (Ubuntu 22.04) so your local setup is never touched. **Docker** must be running.
+
+```bash
+bash tests/run_tests.sh
+```
+
+This will:
+1. Build a throw-away image (`term-test`) with `curl`, `git`, `zsh`, and [bats-core](https://github.com/bats-core/bats-core) installed
+2. Copy the repo into the image and run `install.sh` inside it
+3. Execute four [bats](https://bats-core.readthedocs.io/) test suites and print results
+4. Remove the image automatically (pass or fail)
+
+| Test file | What it covers |
+|-----------|----------------|
+| `tests/bats/01_prerequisites.bats` | `prerequisites-helper.sh` correctly detects present / missing tools |
+| `tests/bats/02_omz.bats` | Oh My Zsh directory exists and `~/.zshrc` blocks are correct |
+| `tests/bats/03_p10k.bats` | Powerlevel10k theme is cloned and `~/.p10k.zsh` is in place |
+| `tests/bats/04_aliases.bats` | `~/.zsh_aliases` exists and aliases resolve inside a `zsh` session |

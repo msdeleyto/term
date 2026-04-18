@@ -70,3 +70,24 @@ Correct structure:
 ```
 
 If replacing `config/p10k.zsh` with a freshly generated one from `p10k configure`, verify the generated file's closing structure matches this pattern before committing.
+
+## Testing
+
+Tests live in `tests/` and run inside a Docker container so the host environment is never touched.
+
+```
+tests/
+├── run_tests.sh          # Entry point: docker build → run bats → docker rmi (cleanup always runs)
+├── Dockerfile.test       # ubuntu:22.04 + curl/git/zsh + bats-core (from GitHub source)
+└── bats/
+    ├── 01_prerequisites.bats   # PATH manipulation tests for prerequisites-helper.sh
+    ├── 02_omz.bats             # setup_file runs install.sh; asserts OMZ dirs and .zshrc blocks
+    ├── 03_p10k.bats            # asserts p10k theme dir, ~/.p10k.zsh, and .zshrc blocks
+    └── 04_aliases.bats         # asserts ~/.zsh_aliases and alias resolution via zsh -c
+```
+
+### Conventions for new tests
+- Test files are numbered `NN_name.bats` and run in order.
+- Files that need a full install call `bash /repo/install.sh` inside `setup_file()`. The script is idempotent — calling it multiple times across test files is safe.
+- Use `load '/opt/bats-support/load.bash'` and `load '/opt/bats-assert/load.bash'` at the top of every test file to access `assert_success`, `assert_output`, etc.
+- PATH-manipulation tests (prerequisites) use a `tmpbin` directory with only the desired symlinks to simulate missing tools.

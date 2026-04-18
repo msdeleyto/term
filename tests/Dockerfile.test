@@ -1,0 +1,23 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install prerequisites that install.sh requires, plus git for bats-core installation
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    zsh \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install bats-core and helpers from source (the apt package is outdated)
+RUN git clone --depth=1 https://github.com/bats-core/bats-core.git /opt/bats-core \
+    && /opt/bats-core/install.sh /usr/local
+
+RUN git clone --depth=1 https://github.com/bats-core/bats-support.git /opt/bats-support
+RUN git clone --depth=1 https://github.com/bats-core/bats-assert.git /opt/bats-assert
+
+# Copy the repository into the image
+COPY . /repo
+
+WORKDIR /repo
