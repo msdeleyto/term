@@ -50,6 +50,10 @@ if [[ ! -f "${p10k_src_path}" ]]; then
 else
   cp "${p10k_src_path}" "${HOME}/.p10k.zsh"
   success "Copied p10k config to ~/.p10k.zsh"
-  append_if_absent '[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh' "${zshrc_path}"
-  success "p10k source line present in ${zshrc_path}."
+
+  # Strip legacy bare line
+  sed -i '/^\[\[ -f ~\/\.p10k\.zsh \]\] && source ~\/\.p10k\.zsh$/d' "${zshrc_path}"
+
+  write_block "Powerlevel10k" '[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh' "${zshrc_path}"
+  success "Powerlevel10k block written to ${zshrc_path}."
 fi

@@ -19,31 +19,20 @@ else
   success "Oh My Zsh installed."
 fi
 
-# Ensure the OMZ export is present
-append_if_absent "export ZSH=\"\$HOME/.oh-my-zsh\"" "${zshrc_path}"
-
-if grep -q '^ZSH_THEME=' "${zshrc_path}" 2>/dev/null; then
-  sed -i 's|^ZSH_THEME=.*|ZSH_THEME="powerlevel10k/powerlevel10k"|' "${zshrc_path}"
-  success "ZSH_THEME updated to powerlevel10k."
-else
-  echo 'ZSH_THEME="powerlevel10k/powerlevel10k"' >> "${zshrc_path}"
-  success "ZSH_THEME appended to ${zshrc_path}."
-fi
-
-if [[ ! -f "${plugins_file_path}" ]]; then
-  warn "No ${plugins_file_path} found — skipping plugins update."
-else
+# Build plugins list
+plugins_zsh_line="plugins=(git)"
+if [[ -f "${plugins_file_path}" ]]; then
   plugins_list=$(grep -v '^\s*#' "${plugins_file_path}" | grep -v '^\s*$' | tr '\n' ' ' | sed 's/ $//')
   plugins_zsh_line="plugins=(${plugins_list})"
-
-  if grep -q '^plugins=(' "${zshrc_path}" 2>/dev/null; then
-    sed -i "s|^plugins=(.*)|${plugins_zsh_line}|" "${zshrc_path}"
-    success "plugins= line updated: ${plugins_zsh_line}"
-  else
-    echo "${plugins_zsh_line}" >> "${zshrc_path}"
-    success "plugins= appended: ${plugins_zsh_line}"
-  fi
 fi
 
-# source oh-my-zsh.sh must come AFTER ZSH_THEME and plugins are set
-append_if_absent "source \"\$ZSH/oh-my-zsh.sh\"" "${zshrc_path}"
+# Strip legacy bare lines left by previous installs
+sed -i '/^export ZSH=/d; /^ZSH_THEME=/d; /^plugins=(/d; /^source "\$ZSH\/oh-my-zsh\.sh"/d' "${zshrc_path}"
+
+omz_block="export ZSH=\"\$HOME/.oh-my-zsh\"
+ZSH_THEME=\"powerlevel10k/powerlevel10k\"
+${plugins_zsh_line}
+source \"\$ZSH/oh-my-zsh.sh\""
+
+write_block "Oh My Zsh" "${omz_block}" "${zshrc_path}"
+success "Oh My Zsh block written to ${zshrc_path}."

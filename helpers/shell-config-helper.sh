@@ -13,7 +13,10 @@ if [[ ! -f "${aliases_file_path}" ]]; then
   warn "No ${aliases_file_path} found — skipping."
 else
   cp "${aliases_file_path}" "${HOME}/.aliases"
-  source_line="[[ -f \"\$HOME/.aliases\" ]] && source \"\$HOME/.aliases\""
-  append_if_absent "${source_line}" "${zshrc_path}"
-  success "Aliases copied to ~/.aliases and source line present in ${zshrc_path}."
+
+  # Strip legacy bare line
+  sed -i '/^\[\[ -f "\$HOME\/\.aliases" \]\] && source "\$HOME\/\.aliases"$/d' "${zshrc_path}"
+
+  write_block "Aliases" '[[ -f "$HOME/.aliases" ]] && source "$HOME/.aliases"' "${zshrc_path}"
+  success "Aliases copied to ~/.aliases and block written to ${zshrc_path}."
 fi
