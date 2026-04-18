@@ -79,7 +79,9 @@ Edit [`config/aliases.zsh`](./config/aliases.zsh). On the next `bash install.sh`
 
 ### Customising the prompt
 
-Edit [`config/p10k.zsh`](./config/p10k.zsh) and re-run `bash install.sh` to overwrite `~/.p10k.zsh`. Alternatively, run `p10k configure` in a live shell to go through the interactive wizard, then copy the generated `~/.p10k.zsh` back into `config/p10k.zsh`.
+Edit [`config/p10k.zsh`](./config/p10k.zsh) and re-run `bash install.sh` to overwrite `~/.p10k.zsh`.
+
+Alternatively, run `p10k configure` in a live shell to go through the interactive wizard, then copy the generated `~/.p10k.zsh` back into `config/p10k.zsh`. If you do this, make sure the option-restore line appears in the `always {}` block at the end of the file — **not** inside the inner `() { emulate -L zsh }` function — otherwise alias expansion will be silently disabled in every shell session.
 
 ## Development
 

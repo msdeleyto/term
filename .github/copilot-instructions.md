@@ -1,6 +1,17 @@
 # Copilot Instructions
 
-## Validation
+## Documentation Policy
+
+Any code change that affects behaviour, structure, conventions, or usage must be reflected in the relevant documentation before the task is considered complete. This includes:
+
+- `README.md` — for changes visible to users (prerequisites, steps, configuration, repo structure)
+- `.github/copilot-instructions.md` — for changes to architecture, conventions, or non-obvious patterns
+- Inline comments in scripts — for changes to logic that isn't self-evident
+
+## Scope
+
+Only modify files inside this repository. Never edit files outside the repo (e.g. `~/.zshrc`, `~/.p10k.zsh`, `~/.zsh_aliases`) without explicit permission from the user.
+
 
 No build step. Validate shell syntax with:
 ```bash
@@ -16,7 +27,7 @@ bash -n lib/utils.sh
 1. `helpers/prerequisites-helper.sh` — checks for `curl`, `git`, `zsh`
 2. `helpers/omz-helper.sh <zshrc> <omz_dir> <plugins_file>` — installs Oh My Zsh, writes the OMZ block to `~/.zshrc`
 3. `helpers/p10k-helper.sh <zshrc> <p10k_theme_dir> <p10k_src>` — clones Powerlevel10k, copies `config/p10k.zsh` to `~/.p10k.zsh`
-4. `helpers/shell-config-helper.sh <zshrc> <aliases_file>` — copies `config/aliases.zsh` to `~/.aliases`
+4. `helpers/shell-config-helper.sh <zshrc> <aliases_file>` — copies `config/zsh_aliases` to `~/.zsh_aliases`
 
 Every helper sources `lib/utils.sh` at the top using a `$(dirname "${BASH_SOURCE[0]}")` relative path. Helpers receive all paths as positional arguments — not environment variables.
 
@@ -39,3 +50,22 @@ One plugin name per line. Lines starting with `#` and blank lines are ignored wh
 
 ### Shell strictness
 `install.sh` runs with `set -euo pipefail`. Helper scripts are invoked as subprocesses and do **not** inherit this — none of them set it themselves either. New helpers should add `set -euo pipefail` near the top to match the strictness of `install.sh`.
+
+### `config/p10k.zsh` structure
+The file uses a `{ } always { }` block that temporarily sets `no_aliases` and must restore `aliases` afterwards. The restore line **must** live in the `always {}` block, not inside the inner anonymous function `() { emulate -L zsh }` — `emulate -L` scopes option changes locally, so any `setopt` inside it is undone when the function returns, leaving `no_aliases` active for the entire shell session and breaking alias expansion.
+
+Correct structure:
+```zsh
+'builtin' 'setopt' 'no_aliases' ...
+{
+  () {
+    emulate -L zsh -o extended_glob
+    # ... all typeset -g config ...
+  }
+} always {
+  (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
+  'builtin' 'unset' 'p10k_config_opts'
+}
+```
+
+If replacing `config/p10k.zsh` with a freshly generated one from `p10k configure`, verify the generated file's closing structure matches this pattern before committing.
