@@ -1,7 +1,3 @@
-# ─── Shell aliases ────────────────────────────────────────────────────────────
-# Add your custom aliases here. Re-run install.sh to apply to ~/.zshrc.
-# ──────────────────────────────────────────────────────────────────────────────
-
 # Navigation
 alias ..='cd ..'
 alias ...='cd ../..'

@@ -23,11 +23,3 @@ append_if_absent() {
   local line="$1" file="$2"
   grep -qxF "$line" "$file" 2>/dev/null || echo "$line" >> "$file"
 }
-
-# ── Shared paths ──────────────────────────────────────────────────────────────
-# SCRIPT_DIR must be set by the caller (install.sh) before sourcing this file.
-ZSHRC="$HOME/.zshrc"
-OMZ_DIR="$HOME/.oh-my-zsh"
-P10K_THEME_DIR="${ZSH_CUSTOM:-$OMZ_DIR/custom}/themes/powerlevel10k"
-FONTS_DIR="$HOME/.local/share/fonts"
-CONFIG_DIR="${SCRIPT_DIR}/config"
