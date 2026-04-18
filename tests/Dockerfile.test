@@ -17,6 +17,9 @@ RUN git clone --depth=1 https://github.com/bats-core/bats-core.git /opt/bats-cor
 RUN git clone --depth=1 https://github.com/bats-core/bats-support.git /opt/bats-support
 RUN git clone --depth=1 https://github.com/bats-core/bats-assert.git /opt/bats-assert
 
+# Set zsh as the default shell for root (the user that runs the tests)
+RUN chsh -s "$(which zsh)" root
+
 # Copy the repository into the image
 COPY . /repo
 
