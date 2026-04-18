@@ -22,7 +22,10 @@ HELPER="/repo/helpers/prerequisites-helper.sh"
   ln -s "$(command -v curl)" "${tmpbin}/curl"
   ln -s "$(command -v git)"  "${tmpbin}/git"
 
-  PATH="${tmpbin}" run bash "${HELPER}"
+  # Use env + absolute bash path so only the subprocess gets the restricted PATH.
+  # PATH="..." run bash ... does not work: 'run' is a shell function, so the
+  # assignment modifies the current shell's PATH, making bash itself unfindable (exit 127).
+  run env PATH="${tmpbin}" /bin/bash "${HELPER}"
   assert_failure
   assert_output --partial "zsh"
 
@@ -36,7 +39,7 @@ HELPER="/repo/helpers/prerequisites-helper.sh"
   ln -s "$(command -v git)" "${tmpbin}/git"
   ln -s "$(command -v zsh)" "${tmpbin}/zsh"
 
-  PATH="${tmpbin}" run bash "${HELPER}"
+  run env PATH="${tmpbin}" /bin/bash "${HELPER}"
   assert_failure
   assert_output --partial "curl"
 
@@ -50,7 +53,7 @@ HELPER="/repo/helpers/prerequisites-helper.sh"
   ln -s "$(command -v curl)" "${tmpbin}/curl"
   ln -s "$(command -v zsh)"  "${tmpbin}/zsh"
 
-  PATH="${tmpbin}" run bash "${HELPER}"
+  run env PATH="${tmpbin}" /bin/bash "${HELPER}"
   assert_failure
   assert_output --partial "git"
 

@@ -20,6 +20,24 @@ bash -n helpers/<helper>.sh
 bash -n lib/utils.sh
 ```
 
+> **Note:** `.bats` files use bats DSL (`@test`) and cannot be validated with `bash -n`.
+> Run the full Docker test suite to verify them: `bash tests/run_tests.sh`.
+
+### Test verification requirement
+
+Any change to `tests/bats/` **must** be verified by running the Docker test suite before committing. Do not rely on syntax-only checks for bats files — tests must actually execute and pass.
+
+#### bats PATH-restriction pattern
+When testing for missing prerequisites, use `env` + an absolute interpreter path to restrict PATH for the subprocess only. Using `PATH="..." run bash ...` silently breaks because `run` is a shell function — the assignment modifies the current shell's PATH, causing bash itself to be unfindable (exit 127):
+
+```bash
+# ✗ Wrong — modifies the current shell's PATH; bash can't be found (exit 127)
+PATH="${tmpbin}" run bash script.sh
+
+# ✓ Correct — env restricts PATH only for the subprocess; /bin/bash is absolute
+run env PATH="${tmpbin}" /bin/bash script.sh
+```
+
 ## Architecture
 
 `install.sh` is a thin orchestrator — it sets path variables and calls five helpers in order:
