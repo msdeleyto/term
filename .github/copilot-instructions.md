@@ -12,6 +12,15 @@ Any code change that affects behaviour, structure, conventions, or usage must be
 
 Only modify files inside this repository. Never edit files outside the repo (e.g. `~/.zshrc`, `~/.p10k.zsh`, `~/.zsh_aliases`) without explicit permission from the user.
 
+## Git commits
+
+Commit when it makes sense to capture a meaningful unit of work — a completed feature, a bug fix, a refactor, a docs update. Each commit should:
+- Have a clear, descriptive message explaining *what* and *why*
+- Represent a coherent, self-contained change (not a half-done state)
+- Keep the repo history useful and navigable
+
+Do **not** commit after every file edit, and do **not** hold off until the end of a long session. Use judgment to group related changes into logical commits.
+
 
 No build step. Validate shell syntax with:
 ```bash
