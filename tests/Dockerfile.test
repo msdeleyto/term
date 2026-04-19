@@ -3,10 +3,12 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install prerequisites that install.sh requires, plus git for bats-core installation
+# kcov is used for bash code coverage measurement (requires Ubuntu 22.04 for v38)
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     curl \
     fontconfig \
     git \
+    kcov \
     zsh \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
