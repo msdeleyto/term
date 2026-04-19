@@ -8,6 +8,10 @@ Any code change that affects behaviour, structure, conventions, or usage must be
 - `.github/copilot-instructions.md` — for changes to architecture, conventions, or non-obvious patterns
 - Inline comments in scripts — for changes to logic that isn't self-evident
 
+## Testing Policy
+
+Any change to production code — new files, new functions, or changes to existing functions — must be accompanied by tests before the task is considered complete. Tests live in `tests/bats/` and run inside Docker. The rule: **no untested production code merges**.
+
 ## Scope
 
 Only modify files inside this repository. Never edit files outside the repo (e.g. `~/.zshrc`, `~/.p10k.zsh`, `~/.zsh_aliases`) without explicit permission from the user.
@@ -89,23 +93,27 @@ One plugin name per line. Lines starting with `#` and blank lines are ignored wh
 `install.sh` runs with `set -euo pipefail`. Helper scripts are invoked as subprocesses and do **not** inherit this — none of them set it themselves either. New helpers should add `set -euo pipefail` near the top to match the strictness of `install.sh`.
 
 ### `config/p10k.zsh` structure
-The file uses a `{ } always { }` block that temporarily sets `no_aliases` and must restore `aliases` afterwards. The restore line **must** live in the `always {}` block, not inside the inner anonymous function `() { emulate -L zsh }` — `emulate -L` scopes option changes locally, so any `setopt` inside it is undone when the function returns, leaving `no_aliases` active for the entire shell session and breaking alias expansion.
+The file uses an anonymous function `() { emulate -L zsh -o extended_glob; ... }` that contains all configuration. Options (`no_aliases`, `no_sh_glob`, `brace_expand`) are saved before and restored **after** the function closes, at the top level of the script:
 
-Correct structure:
 ```zsh
-'builtin' 'setopt' 'no_aliases' ...
-{
-  () {
-    emulate -L zsh -o extended_glob
-    # ... all typeset -g config ...
-  }
-} always {
-  (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
-  'builtin' 'unset' 'p10k_config_opts'
+'builtin' 'local' '-a' 'p10k_config_opts'
+[[ ! -o 'aliases'         ]] || p10k_config_opts+=('aliases')
+[[ ! -o 'sh_glob'         ]] || p10k_config_opts+=('sh_glob')
+[[ ! -o 'no_brace_expand' ]] || p10k_config_opts+=('no_brace_expand')
+'builtin' 'setopt' 'no_aliases' 'no_sh_glob' 'brace_expand'
+
+() {
+  emulate -L zsh -o extended_glob
+  # ... all typeset -g config ...
 }
+
+(( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
+'builtin' 'unset' 'p10k_config_opts'
 ```
 
-If replacing `config/p10k.zsh` with a freshly generated one from `p10k configure`, verify the generated file's closing structure matches this pattern before committing.
+The restore lines must stay **outside** (after) the anonymous function at the script's top level. Do not place them inside the `() { emulate -L zsh }` function — `emulate -L` scopes option changes locally, so any `setopt` inside it is undone when the function returns.
+
+If replacing `config/p10k.zsh` with a freshly generated one from `p10k configure`, verify the generated file ends with this pattern.
 
 ## Testing
 
@@ -114,12 +122,13 @@ Tests live in `tests/` and run inside a Docker container so the host environment
 ```
 tests/
 ├── run_tests.sh          # Entry point: docker build → run bats → docker rmi (cleanup always runs)
-├── Dockerfile.test       # ubuntu:22.04 + curl/git/zsh + bats-core (from GitHub source)
+├── Dockerfile.test       # ubuntu:22.04 + curl/fontconfig/git/zsh + bats-core (from GitHub source)
 └── bats/
     ├── 01_prerequisites.bats   # PATH manipulation tests for prerequisites-helper.sh
-    ├── 02_omz.bats             # setup_file runs install.sh; asserts OMZ dirs and .zshrc blocks
-    ├── 03_p10k.bats            # asserts p10k theme dir, ~/.p10k.zsh, and .zshrc blocks
-    └── 04_aliases.bats         # asserts ~/.zsh_aliases and alias resolution via zsh -c
+    ├── 02_fonts.bats           # setup_file runs install.sh; asserts font files and idempotency
+    ├── 03_omz.bats             # setup_file runs install.sh; asserts OMZ dirs and .zshrc blocks
+    ├── 04_p10k.bats            # asserts p10k theme dir, ~/.p10k.zsh, and .zshrc blocks
+    └── 05_aliases.bats         # asserts ~/.zsh_aliases and alias resolution via zsh -c
 ```
 
 ### Conventions for new tests
@@ -127,3 +136,11 @@ tests/
 - Files that need a full install call `bash /repo/install.sh` inside `setup_file()`. The script is idempotent — calling it multiple times across test files is safe.
 - Use `load '/opt/bats-support/load.bash'` and `load '/opt/bats-assert/load.bash'` at the top of every test file to access `assert_success`, `assert_output`, etc.
 - PATH-manipulation tests (prerequisites) use a `tmpbin` directory with only the desired symlinks to simulate missing tools.
+
+## CI
+
+The CI workflow lives at `.github/workflows/ci.yml` and runs `bash tests/run_tests.sh` on every push to `main` and on pull requests targeting `main`.
+
+Conventions for the workflow:
+- **Runner**: always pin to `ubuntu-22.04` — do not use `ubuntu-latest` (avoids unexpected breakage when the latest label moves to a new OS version).
+- **Permissions**: set `permissions: contents: read` at the workflow level (least-privilege); escalate only in the specific job/step that needs it.
