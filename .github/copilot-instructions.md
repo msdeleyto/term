@@ -89,23 +89,27 @@ One plugin name per line. Lines starting with `#` and blank lines are ignored wh
 `install.sh` runs with `set -euo pipefail`. Helper scripts are invoked as subprocesses and do **not** inherit this — none of them set it themselves either. New helpers should add `set -euo pipefail` near the top to match the strictness of `install.sh`.
 
 ### `config/p10k.zsh` structure
-The file uses a `{ } always { }` block that temporarily sets `no_aliases` and must restore `aliases` afterwards. The restore line **must** live in the `always {}` block, not inside the inner anonymous function `() { emulate -L zsh }` — `emulate -L` scopes option changes locally, so any `setopt` inside it is undone when the function returns, leaving `no_aliases` active for the entire shell session and breaking alias expansion.
+The file uses an anonymous function `() { emulate -L zsh -o extended_glob; ... }` that contains all configuration. Options (`no_aliases`, `no_sh_glob`, `brace_expand`) are saved before and restored **after** the function closes, at the top level of the script:
 
-Correct structure:
 ```zsh
-'builtin' 'setopt' 'no_aliases' ...
-{
-  () {
-    emulate -L zsh -o extended_glob
-    # ... all typeset -g config ...
-  }
-} always {
-  (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
-  'builtin' 'unset' 'p10k_config_opts'
+'builtin' 'local' '-a' 'p10k_config_opts'
+[[ ! -o 'aliases'         ]] || p10k_config_opts+=('aliases')
+[[ ! -o 'sh_glob'         ]] || p10k_config_opts+=('sh_glob')
+[[ ! -o 'no_brace_expand' ]] || p10k_config_opts+=('no_brace_expand')
+'builtin' 'setopt' 'no_aliases' 'no_sh_glob' 'brace_expand'
+
+() {
+  emulate -L zsh -o extended_glob
+  # ... all typeset -g config ...
 }
+
+(( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
+'builtin' 'unset' 'p10k_config_opts'
 ```
 
-If replacing `config/p10k.zsh` with a freshly generated one from `p10k configure`, verify the generated file's closing structure matches this pattern before committing.
+The restore lines must stay **outside** (after) the anonymous function at the script's top level. Do not place them inside the `() { emulate -L zsh }` function — `emulate -L` scopes option changes locally, so any `setopt` inside it is undone when the function returns.
+
+If replacing `config/p10k.zsh` with a freshly generated one from `p10k configure`, verify the generated file ends with this pattern.
 
 ## Testing
 

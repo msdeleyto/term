@@ -6,7 +6,7 @@
 
 A single script that installs and configures a complete terminal environment from scratch. When something breaks or you move to a new machine, clone this repo and run `install.sh` — you'll have your full setup back in minutes.
 
-All configuration lives in plain files under `config/`. The script reads them and applies idempotent named blocks to `~/.zshrc` using `write_block`; nothing is symlinked.
+All configuration lives in plain files under `config/`. The script reads them and applies idempotent named blocks to `~/.zshrc` using `write_block` (appended blocks) and `prepend_block` (top-of-file blocks); nothing is symlinked.
 
 ## Prerequisites
 
@@ -37,7 +37,7 @@ The script is **idempotent** — re-running it skips anything already in place a
 | 4 | Clone [Powerlevel10k](https://github.com/romkatv/powerlevel10k) theme |
 | 5 | Set `ZSH_THEME="powerlevel10k/powerlevel10k"` in `~/.zshrc` |
 | 6 | Apply plugins from `config/plugins.txt` to the `plugins=(...)` line in `~/.zshrc` |
-| 7 | Copy `config/p10k.zsh` to `~/.p10k.zsh` and add a source line to `~/.zshrc` |
+| 7 | Copy `config/p10k.zsh` to `~/.p10k.zsh`; add a source line to `~/.zshrc` and prepend the instant prompt block to the top of `~/.zshrc` |
 | 8 | Copy `config/zsh_aliases` to `~/.zsh_aliases` and add a source line to `~/.zshrc` |
 
 ## Repository structure
@@ -52,7 +52,7 @@ term/
 │   ├── p10k-helper.sh            # Clones Powerlevel10k and applies p10k config
 │   └── shell-config-helper.sh    # Copies aliases and writes source line
 ├── lib/
-│   └── utils.sh          # Shared logging functions and write_block helper
+│   └── utils.sh          # Shared logging functions, write_block and prepend_block helpers
 └── config/
     ├── plugins.txt       # Oh My Zsh plugins, one per line
     ├── zsh_aliases       # Shell aliases copied to ~/.zsh_aliases at install time
@@ -95,7 +95,7 @@ After install, set your terminal emulator's font to the installed font.
 
 Edit [`config/p10k.zsh`](./config/p10k.zsh) and re-run `bash install.sh` to overwrite `~/.p10k.zsh`.
 
-Alternatively, run `p10k configure` in a live shell to go through the interactive wizard, then copy the generated `~/.p10k.zsh` back into `config/p10k.zsh`. If you do this, make sure the option-restore line appears in the `always {}` block at the end of the file — **not** inside the inner `() { emulate -L zsh }` function — otherwise alias expansion will be silently disabled in every shell session.
+Alternatively, run `p10k configure` in a live shell to go through the interactive wizard, then copy the generated `~/.p10k.zsh` back into `config/p10k.zsh`. If you do this, verify the generated file ends with the option-restore lines **outside** (after) the anonymous function at the script's top level — not inside the inner `() { emulate -L zsh }` function — otherwise alias expansion will be silently disabled in every shell session.
 
 ## Development
 
@@ -114,7 +114,7 @@ bash tests/run_tests.sh
 ```
 
 This will:
-1. Build a throw-away image (`term-test`) with `curl`, `git`, `zsh`, and [bats-core](https://github.com/bats-core/bats-core) installed
+1. Build a throw-away image (`term-test`) with `curl`, `fontconfig`, `git`, `zsh`, and [bats-core](https://github.com/bats-core/bats-core) installed
 2. Copy the repo into the image and run `install.sh` inside it
 3. Execute four [bats](https://bats-core.readthedocs.io/) test suites and print results
 4. Remove the image automatically (pass or fail)
