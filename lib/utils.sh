@@ -45,3 +45,29 @@ write_block() {
     printf '\n%s\n%s\n%s\n' "${begin}" "${content}" "${end}" >> "${file}"
   fi
 }
+
+# Write a named, marked block to the TOP of a file, idempotently.
+# If the block (BEGIN/END markers) already exists anywhere in the file, its content is replaced.
+# If not, the block is prepended.
+# Usage: prepend_block <name> <content> <file>
+prepend_block() {
+  local name="$1" content="$2" file="$3"
+  local begin="# --- BEGIN: ${name} ---"
+  local end="# --- END: ${name} ---"
+  local tmp
+
+  if grep -qF "${begin}" "${file}" 2>/dev/null; then
+    tmp="${file}.tmp"
+    awk -v begin="${begin}" -v end="${end}" -v content="${content}" '
+      $0 == begin { print begin; print content; in_block=1; next }
+      in_block && $0 == end { print end; in_block=0; next }
+      in_block { next }
+      { print }
+    ' "${file}" > "${tmp}" && mv "${tmp}" "${file}"
+  else
+    tmp=$(mktemp)
+    printf '%s\n%s\n%s\n\n' "${begin}" "${content}" "${end}" > "${tmp}"
+    cat "${file}" >> "${tmp}"
+    mv "${tmp}" "${file}"
+  fi
+}

@@ -77,7 +77,7 @@ All multi-line blocks written to `~/.zshrc` use `write_block` from `lib/utils.sh
 Re-running replaces the block in-place. Never write to `~/.zshrc` with bare `echo` or `sed` appends; always use `write_block` (multi-line) or `append_if_absent` (single line).
 
 ### Instant prompt block (top-of-file, idempotent)
-The p10k instant prompt block must appear at the **top** of `~/.zshrc` and cannot use `write_block` (which appends). Instead, `p10k-helper.sh` guards with `grep -qF 'p10k-instant-prompt'` before prepending: if the marker is already present, the insert is skipped. Prepending uses a temp file (`mktemp`) to avoid multi-line `sed` quoting issues.
+The p10k instant prompt block must appear at the **top** of `~/.zshrc` and cannot use `write_block` (which appends). Use `prepend_block` from `lib/utils.sh` instead — it wraps the block in the same `BEGIN`/`END` named markers and either replaces the content in-place (if the marker exists) or prepends the block to the top of the file (if absent). Never use bare `sed` or manual `mktemp` prepends for this.
 
 ### Logging
 Use the functions from `lib/utils.sh` — `info`, `success`, `warn`, `error`, `step`. Do not use raw `echo` for user-facing messages.

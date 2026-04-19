@@ -30,11 +30,11 @@ setup_file() {
 }
 
 @test "zshrc contains p10k instant prompt block" {
-  grep -qF 'p10k-instant-prompt' "${HOME}/.zshrc"
+  grep -qF "# --- BEGIN: P10k Instant Prompt ---" "${HOME}/.zshrc"
 }
 
 @test "p10k instant prompt block appears only once in zshrc" {
   local count
-  count=$(grep -cF 'Enable Powerlevel10k instant prompt' "${HOME}/.zshrc")
+  count=$(grep -cF "# --- BEGIN: P10k Instant Prompt ---" "${HOME}/.zshrc")
   [ "${count}" -eq 1 ]
 }

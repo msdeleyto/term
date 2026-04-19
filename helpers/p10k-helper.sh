@@ -35,13 +35,5 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi'
 
-if grep -qF 'p10k-instant-prompt' "${zshrc_path}" 2>/dev/null; then
-  success "Powerlevel10k instant prompt already present in ${zshrc_path}."
-else
-  local tmp
-  tmp=$(mktemp)
-  printf '%s\n\n' "${p10k_instant_prompt}" > "${tmp}"
-  cat "${zshrc_path}" >> "${tmp}"
-  mv "${tmp}" "${zshrc_path}"
-  success "Powerlevel10k instant prompt added to top of ${zshrc_path}."
-fi
+prepend_block "P10k Instant Prompt" "${p10k_instant_prompt}" "${zshrc_path}"
+success "Powerlevel10k instant prompt block written to top of ${zshrc_path}."
