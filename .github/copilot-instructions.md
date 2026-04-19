@@ -114,7 +114,7 @@ Tests live in `tests/` and run inside a Docker container so the host environment
 ```
 tests/
 ├── run_tests.sh          # Entry point: docker build → run bats → docker rmi (cleanup always runs)
-├── Dockerfile.test       # ubuntu:22.04 + curl/git/zsh + bats-core (from GitHub source)
+├── Dockerfile.test       # ubuntu:22.04 + curl/fontconfig/git/zsh + bats-core (from GitHub source)
 └── bats/
     ├── 01_prerequisites.bats   # PATH manipulation tests for prerequisites-helper.sh
     ├── 02_omz.bats             # setup_file runs install.sh; asserts OMZ dirs and .zshrc blocks
@@ -127,3 +127,11 @@ tests/
 - Files that need a full install call `bash /repo/install.sh` inside `setup_file()`. The script is idempotent — calling it multiple times across test files is safe.
 - Use `load '/opt/bats-support/load.bash'` and `load '/opt/bats-assert/load.bash'` at the top of every test file to access `assert_success`, `assert_output`, etc.
 - PATH-manipulation tests (prerequisites) use a `tmpbin` directory with only the desired symlinks to simulate missing tools.
+
+## CI
+
+The CI workflow lives at `.github/workflows/ci.yml` and runs `bash tests/run_tests.sh` on every push to `main` and on pull requests targeting `main`.
+
+Conventions for the workflow:
+- **Runner**: always pin to `ubuntu-22.04` — do not use `ubuntu-latest` (avoids unexpected breakage when the latest label moves to a new OS version).
+- **Permissions**: set `permissions: contents: read` at the workflow level (least-privilege); escalate only in the specific job/step that needs it.
