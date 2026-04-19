@@ -121,8 +121,9 @@ Tests live in `tests/` and run inside a Docker container so the host environment
 
 ```
 tests/
-├── run_tests.sh          # Entry point: docker build → run bats → docker rmi (cleanup always runs)
-├── Dockerfile.test       # ubuntu:22.04 + curl/fontconfig/git/zsh + bats-core (from GitHub source)
+├── run_tests.sh          # Entry point: docker build → run bats [+ kcov] → docker rmi (cleanup always runs)
+│                         # Usage: bash tests/run_tests.sh [--coverage]
+├── Dockerfile.test       # ubuntu:22.04 + curl/fontconfig/git/kcov/zsh + bats-core (from GitHub source)
 └── bats/
     ├── 01_prerequisites.bats   # PATH manipulation tests for prerequisites-helper.sh
     ├── 02_fonts.bats           # setup_file runs install.sh; asserts font files and idempotency
@@ -139,8 +140,23 @@ tests/
 
 ## CI
 
-The CI workflow lives at `.github/workflows/ci.yml` and runs `bash tests/run_tests.sh` on every push to `main` and on pull requests targeting `main`.
+The CI workflow lives at `.github/workflows/ci.yml` and runs `bash tests/run_tests.sh --coverage` on every push to `main` and on pull requests targeting `main`.
 
 Conventions for the workflow:
 - **Runner**: always pin to `ubuntu-22.04` — do not use `ubuntu-latest` (avoids unexpected breakage when the latest label moves to a new OS version).
 - **Permissions**: set `permissions: contents: read` at the workflow level (least-privilege); escalate only in the specific job/step that needs it.
+
+## Coverage
+
+Coverage is measured with **kcov** (v38, available in Ubuntu 22.04 apt). kcov instruments bash scripts at line level via ptrace.
+
+- Included paths: `/repo/lib`, `/repo/helpers`, `/repo/install.sh`
+- Excluded: `/repo/tests` (test files are not measured)
+- Minimum threshold: **80%** (configurable via `COVERAGE_MIN` env var)
+- Requires Docker with `--security-opt seccomp=unconfined` (needed for ptrace); applied automatically by `run_tests.sh --coverage`
+
+### Pre-commit hook
+
+`scripts/install-hooks.sh` installs `.git/hooks/pre-commit` which calls `bash tests/run_tests.sh --coverage`. Developers must run it once after cloning. The hook can be bypassed with `git commit --no-verify`.
+
+The hook is **not** committed to the repo (`.git/hooks/` is excluded by git). Always document the install step in README and tell contributors to run `bash scripts/install-hooks.sh`.

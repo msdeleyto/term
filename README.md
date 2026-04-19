@@ -45,6 +45,8 @@ The script is **idempotent** — re-running it skips anything already in place a
 ```
 term/
 ├── install.sh            # Bootstrap entry point
+├── scripts/
+│   └── install-hooks.sh  # Installs the git pre-commit hook (run once after cloning)
 ├── helpers/
 │   ├── prerequisites-helper.sh   # Verifies required tools
 │   ├── fonts-helper.sh           # Downloads and installs Nerd Fonts
@@ -114,7 +116,7 @@ bash tests/run_tests.sh
 ```
 
 This will:
-1. Build a throw-away image (`term-test`) with `curl`, `fontconfig`, `git`, `zsh`, and [bats-core](https://github.com/bats-core/bats-core) installed
+1. Build a throw-away image (`term-test`) with `curl`, `fontconfig`, `git`, `kcov`, `zsh`, and [bats-core](https://github.com/bats-core/bats-core) installed
 2. Copy the repo into the image and run `install.sh` inside it
 3. Execute four [bats](https://bats-core.readthedocs.io/) test suites and print results
 4. Remove the image automatically (pass or fail)
@@ -126,3 +128,27 @@ This will:
 | `tests/bats/03_omz.bats` | Oh My Zsh directory exists and `~/.zshrc` blocks are correct |
 | `tests/bats/04_p10k.bats` | Powerlevel10k theme is cloned and `~/.p10k.zsh` is in place |
 | `tests/bats/05_aliases.bats` | `~/.zsh_aliases` exists and aliases resolve inside a `zsh` session |
+
+### Coverage
+
+Coverage is measured with [kcov](https://github.com/SimonKagstrom/kcov) and enforced at **80%** (configurable via `COVERAGE_MIN`):
+
+```bash
+bash tests/run_tests.sh --coverage
+```
+
+This requires Docker's seccomp profile to be relaxed for ptrace (`--security-opt seccomp=unconfined` is applied automatically).
+
+### Pre-commit hook
+
+To enforce tests + coverage before every commit, install the git hook once after cloning:
+
+```bash
+bash scripts/install-hooks.sh
+```
+
+This writes `.git/hooks/pre-commit`, which runs `bash tests/run_tests.sh --coverage`. To bypass in an emergency:
+
+```bash
+git commit --no-verify
+```
