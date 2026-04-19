@@ -25,3 +25,23 @@ else
   write_block "Powerlevel10k" 'source ~/.p10k.zsh' "${zshrc_path}"
   success "Powerlevel10k block written to ${zshrc_path}."
 fi
+
+info "Adding Powerlevel10k instant prompt to zshrc"
+
+p10k_instant_prompt='# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi'
+
+if grep -qF 'p10k-instant-prompt' "${zshrc_path}" 2>/dev/null; then
+  success "Powerlevel10k instant prompt already present in ${zshrc_path}."
+else
+  local tmp
+  tmp=$(mktemp)
+  printf '%s\n\n' "${p10k_instant_prompt}" > "${tmp}"
+  cat "${zshrc_path}" >> "${tmp}"
+  mv "${tmp}" "${zshrc_path}"
+  success "Powerlevel10k instant prompt added to top of ${zshrc_path}."
+fi

@@ -60,7 +60,7 @@ run bash -c '
 1. `helpers/prerequisites-helper.sh` — checks for `curl`, `git`, `zsh`
 2. `helpers/fonts-helper.sh` — downloads MesloLGS NF fonts to `~/.local/share/fonts/p10k/`; configurable via `FONT_NAME` + `FONT_FILES` at the top of the script
 3. `helpers/omz-helper.sh <zshrc> <omz_dir> <plugins_file>` — installs Oh My Zsh, writes the OMZ block to `~/.zshrc`
-4. `helpers/p10k-helper.sh <zshrc> <p10k_theme_dir> <p10k_src>` — clones Powerlevel10k, copies `config/p10k.zsh` to `~/.p10k.zsh`
+4. `helpers/p10k-helper.sh <zshrc> <p10k_theme_dir> <p10k_src>` — clones Powerlevel10k, copies `config/p10k.zsh` to `~/.p10k.zsh`, and prepends the instant prompt block to `~/.zshrc` (idempotent)
 5. `helpers/shell-config-helper.sh <zshrc> <aliases_file>` — copies `config/zsh_aliases` to `~/.zsh_aliases`
 
 Every helper sources `lib/utils.sh` at the top using a `$(dirname "${BASH_SOURCE[0]}")` relative path. Helpers receive all paths as positional arguments — not environment variables.
@@ -75,6 +75,9 @@ All multi-line blocks written to `~/.zshrc` use `write_block` from `lib/utils.sh
 # --- END: Name ---
 ```
 Re-running replaces the block in-place. Never write to `~/.zshrc` with bare `echo` or `sed` appends; always use `write_block` (multi-line) or `append_if_absent` (single line).
+
+### Instant prompt block (top-of-file, idempotent)
+The p10k instant prompt block must appear at the **top** of `~/.zshrc` and cannot use `write_block` (which appends). Instead, `p10k-helper.sh` guards with `grep -qF 'p10k-instant-prompt'` before prepending: if the marker is already present, the insert is skipped. Prepending uses a temp file (`mktemp`) to avoid multi-line `sed` quoting issues.
 
 ### Logging
 Use the functions from `lib/utils.sh` — `info`, `success`, `warn`, `error`, `step`. Do not use raw `echo` for user-facing messages.

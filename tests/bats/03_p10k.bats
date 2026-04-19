@@ -28,3 +28,13 @@ setup_file() {
 @test "p10k config content matches repo config/p10k.zsh" {
   diff -q /repo/config/p10k.zsh "${HOME}/.p10k.zsh" > /dev/null
 }
+
+@test "zshrc contains p10k instant prompt block" {
+  grep -qF 'p10k-instant-prompt' "${HOME}/.zshrc"
+}
+
+@test "p10k instant prompt block appears only once in zshrc" {
+  local count
+  count=$(grep -cF 'Enable Powerlevel10k instant prompt' "${HOME}/.zshrc")
+  [ "${count}" -eq 1 ]
+}
