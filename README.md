@@ -122,6 +122,7 @@ This will:
 | Test file | What it covers |
 |-----------|----------------|
 | `tests/bats/01_prerequisites.bats` | `prerequisites-helper.sh` correctly detects present / missing tools |
-| `tests/bats/02_omz.bats` | Oh My Zsh directory exists and `~/.zshrc` blocks are correct |
-| `tests/bats/03_p10k.bats` | Powerlevel10k theme is cloned and `~/.p10k.zsh` is in place |
-| `tests/bats/04_aliases.bats` | `~/.zsh_aliases` exists and aliases resolve inside a `zsh` session |
+| `tests/bats/02_fonts.bats` | Font directory and all 4 MesloLGS NF files exist; idempotency (re-run skips downloads) |
+| `tests/bats/03_omz.bats` | Oh My Zsh directory exists and `~/.zshrc` blocks are correct |
+| `tests/bats/04_p10k.bats` | Powerlevel10k theme is cloned and `~/.p10k.zsh` is in place |
+| `tests/bats/05_aliases.bats` | `~/.zsh_aliases` exists and aliases resolve inside a `zsh` session |

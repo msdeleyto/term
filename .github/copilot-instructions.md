@@ -8,6 +8,10 @@ Any code change that affects behaviour, structure, conventions, or usage must be
 - `.github/copilot-instructions.md` — for changes to architecture, conventions, or non-obvious patterns
 - Inline comments in scripts — for changes to logic that isn't self-evident
 
+## Testing Policy
+
+Any change to production code — new files, new functions, or changes to existing functions — must be accompanied by tests before the task is considered complete. Tests live in `tests/bats/` and run inside Docker. The rule: **no untested production code merges**.
+
 ## Scope
 
 Only modify files inside this repository. Never edit files outside the repo (e.g. `~/.zshrc`, `~/.p10k.zsh`, `~/.zsh_aliases`) without explicit permission from the user.
@@ -121,9 +125,10 @@ tests/
 ├── Dockerfile.test       # ubuntu:22.04 + curl/fontconfig/git/zsh + bats-core (from GitHub source)
 └── bats/
     ├── 01_prerequisites.bats   # PATH manipulation tests for prerequisites-helper.sh
-    ├── 02_omz.bats             # setup_file runs install.sh; asserts OMZ dirs and .zshrc blocks
-    ├── 03_p10k.bats            # asserts p10k theme dir, ~/.p10k.zsh, and .zshrc blocks
-    └── 04_aliases.bats         # asserts ~/.zsh_aliases and alias resolution via zsh -c
+    ├── 02_fonts.bats           # setup_file runs install.sh; asserts font files and idempotency
+    ├── 03_omz.bats             # setup_file runs install.sh; asserts OMZ dirs and .zshrc blocks
+    ├── 04_p10k.bats            # asserts p10k theme dir, ~/.p10k.zsh, and .zshrc blocks
+    └── 05_aliases.bats         # asserts ~/.zsh_aliases and alias resolution via zsh -c
 ```
 
 ### Conventions for new tests
