@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install prerequisites that install.sh requires, plus git for bats-core installation
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     curl \
+    fontconfig \
     git \
     zsh \
     ca-certificates \

@@ -1,5 +1,7 @@
 # term — Terminal bootstrap
 
+[![CI](https://github.com/msdeleyto/term/actions/workflows/ci.yml/badge.svg)](https://github.com/msdeleyto/term/actions/workflows/ci.yml)
+
 > Configuration as code for a zsh + Oh My Zsh + Powerlevel10k terminal setup.
 
 A single script that installs and configures a complete terminal environment from scratch. When something breaks or you move to a new machine, clone this repo and run `install.sh` — you'll have your full setup back in minutes.
